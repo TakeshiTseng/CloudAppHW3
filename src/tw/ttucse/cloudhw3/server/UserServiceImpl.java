@@ -1,4 +1,4 @@
-package tw.ttucse.cloudhw1.server;
+package tw.ttucse.cloudhw3.server;
 
 import java.util.Collection;
 import java.util.List;
@@ -9,9 +9,9 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
 
-import tw.ttucse.cloudhw1.client.PMF;
-import tw.ttucse.cloudhw1.client.User;
-import tw.ttucse.cloudhw1.client.UserService;
+import tw.ttucse.cloudhw3.client.PMF;
+import tw.ttucse.cloudhw3.client.User;
+import tw.ttucse.cloudhw3.client.UserService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class UserServiceImpl extends RemoteServiceServlet implements

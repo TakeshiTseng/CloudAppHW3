@@ -1,12 +1,12 @@
-package tw.ttucse.cloudhw1.server;
+package tw.ttucse.cloudhw3.server;
 
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
 
-import tw.ttucse.cloudhw1.client.LoginService;
-import tw.ttucse.cloudhw1.client.PMF;
-import tw.ttucse.cloudhw1.client.User;
+import tw.ttucse.cloudhw3.client.LoginService;
+import tw.ttucse.cloudhw3.client.PMF;
+import tw.ttucse.cloudhw3.client.User;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
