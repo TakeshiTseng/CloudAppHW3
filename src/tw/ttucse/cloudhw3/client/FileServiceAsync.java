@@ -9,7 +9,7 @@ public interface FileServiceAsync {
 
 	void getParents(AsyncCallback<List<MyFile>> callback);
 
-	void createFolder(String name, AsyncCallback<Boolean> callback);
+	void createFolder(String parent, String name, AsyncCallback<Boolean> callback);
 
 	void deleteFile(MyFile file, AsyncCallback<Boolean> callback);
 
