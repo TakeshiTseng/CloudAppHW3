@@ -25,6 +25,17 @@
     <url-pattern>/cloudapphw3/user</url-pattern>
   </servlet-mapping>
   
+  
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <servlet-class>tw.ttucse.cloudhw3.server.UploadServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/cloudapphw3/upload</url-pattern>
+  </servlet-mapping>
+  
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>CloudAppHW3.html</welcome-file>

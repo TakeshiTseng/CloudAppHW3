@@ -14,6 +14,7 @@ public class CloudAppHW3 implements EntryPoint {
 	 */
 	
 	public void onModuleLoad() {
+		
 		LoginDialogBox loginDialobBox = new LoginDialogBox();
 		loginDialobBox.setAnimationEnabled(true);
 		loginDialobBox.setText("Login DialogBox");
