@@ -8,11 +8,9 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
-
 import tw.ttucse.cloudhw3.client.FileService;
 import tw.ttucse.cloudhw3.client.MyFile;
 import tw.ttucse.cloudhw3.client.PMF;
-import tw.ttucse.cloudhw3.client.User;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

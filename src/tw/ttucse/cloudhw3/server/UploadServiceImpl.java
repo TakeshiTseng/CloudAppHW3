@@ -6,7 +6,9 @@ import java.util.*;
 import javax.jdo.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
+
 import com.google.appengine.api.blobstore.*;
+
 import tw.ttucse.cloudhw3.client.*;
 
 public class UploadServiceImpl extends HttpServlet {
@@ -55,6 +57,9 @@ public class UploadServiceImpl extends HttpServlet {
 		resp.getWriter().println("</form></body></html>");
 		
 	}
+	
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -75,7 +80,6 @@ public class UploadServiceImpl extends HttpServlet {
 			String queryStatment = "SELECT FROM " + MyFile.class.getName() + " WHERE name == \'"+filename+"\'";//"\' AND fileFolder == \'" + fileParent + "\';";
 			Query query = pm.newQuery(queryStatment);
 			
-			@SuppressWarnings("unchecked")
 			List<MyFile> queryResult = (List<MyFile>) query.execute();
 			
 			if(queryResult.size() == 0){
