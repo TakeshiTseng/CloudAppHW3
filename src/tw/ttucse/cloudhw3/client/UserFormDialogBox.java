@@ -8,8 +8,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 
-public class FormDialogBox extends DialogBox implements ClickHandler {
-	private FormDialogBox thisPanel;
+public class UserFormDialogBox extends DialogBox implements ClickHandler {
+	private UserFormDialogBox thisPanel;
 	private PasswordTextBox password;
 	private TextBox accountTextBox;
 	private TextBox usernameTextBox;
@@ -21,7 +21,7 @@ public class FormDialogBox extends DialogBox implements ClickHandler {
 		Register, Modify;
 	}
 
-	public FormDialogBox(Type type,User user) {
+	public UserFormDialogBox(Type type,User user) {
 
 		FlexTable flexTable = new FlexTable();
 		setWidget(flexTable);

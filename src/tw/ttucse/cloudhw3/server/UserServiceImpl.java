@@ -34,7 +34,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 				String query2 = "SELECT MAX(ID) FROM " + User.class.getName();
 				Long ID = (Long) pm.newQuery(query2).execute();
 				if(ID==null){
-					ID=new Long(0);
+					ID=new Long(1);
 				}
 				user.setID(ID+1);
 				pm.makePersistent(user);
@@ -79,8 +79,24 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public User getUser(String account) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
+		Object obj;
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+		Transaction transaction = pm.currentTransaction();
+		try {
+			transaction.begin();
+			Extent<User> ext = pm.getExtent(User.class, false);
+			String str ="account==\""+account+"\"";
+			Query qry= pm.newQuery(ext, str); 
+			Collection<?> c = (Collection<?>) qry.execute();
+			obj = c.iterator().next();
+			transaction.commit();
+		} catch(JDOUserException ex){
+			transaction.rollback();
+			throw ex;
+		}finally {
+			pm.close();
+		}
+		return (User)obj;
 	}
 
 	@Override

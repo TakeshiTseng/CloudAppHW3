@@ -1,0 +1,2 @@
+serviceClass: tw.ttucse.cloudhw3.client.FileService
+path: BCEFE838A0ED959D8B00E65F84AAC91C.gwt.rpc

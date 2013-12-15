@@ -3,7 +3,7 @@ package tw.ttucse.cloudhw3.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import tw.ttucse.cloudhw3.client.FormDialogBox.Type;
+import tw.ttucse.cloudhw3.client.UserFormDialogBox.Type;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -25,14 +25,37 @@ public class MainWindowPanel extends Composite {
 	private CellTable<User> cellTable;
 	private SimplePager pager;
 	private SingleSelectionModel<User> selectionModel;
+	private FileSystemUserInterfacePane fileSystemUserInterfacePane;
+	private User loginUser;
+
+	public User getLoginUser() {
+		return loginUser;
+	}
+
+	public void setLoginUser(User loginUser) {
+		this.loginUser = loginUser;
+	}
 
 	public static MainWindowPanel getInstance() {
 		return instance;
 	}
+	
+	public FileSystemUserInterfacePane getFileSystemUserInterfacePane() {
+		return fileSystemUserInterfacePane;
+	}
 
 	private static List<User> userlist;
-	private final UserServiceAsync userServiceAsync = GWT.create(UserService.class);
+	private final UserServiceAsync userServiceAsync = GWT
+			.create(UserService.class);
 
+	public MainWindowPanel(User user) {
+		this();
+		setLoginUser(user);
+	}
+	
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public MainWindowPanel() {
 		instance = this;
 		userlist = new ArrayList<User>();
@@ -65,8 +88,10 @@ public class MainWindowPanel extends Composite {
 			@Override
 			public void onSuccess(User[] result) {
 				userlistAddusers(result);
-				List<User> sub = userlist.subList(0,
-						cellTable.getPageSize() >= userlist.size() ? userlist.size() : cellTable.getPageSize());
+				List<User> sub = userlist.subList(
+						0,
+						cellTable.getPageSize() >= userlist.size() ? userlist
+								.size() : cellTable.getPageSize());
 				provider.updateRowData(0, sub);
 				provider.updateRowCount(userlist.size(), true);
 			}
@@ -83,14 +108,21 @@ public class MainWindowPanel extends Composite {
 		Button createButton = new Button("Create");
 		flexTable.setWidget(0, 0, createButton);
 		createButton.addClickHandler(new createButtonClickHandler());
-		
+
+		Label label = new Label("");
+		flexTable.setWidget(0, 1, label);
+
+		Button filesystemButton = new Button("File System");
+		flexTable.setWidget(0, 2, filesystemButton);
+		filesystemButton.addClickHandler(new filesystemButtonClickHander());
+
 		Column<User, Number> column = new Column<User, Number>(new NumberCell()) {
 			@Override
 			public Number getValue(User object) {
 				return (Number) userlist.indexOf(object);
 			}
 		};
-		cellTable.addColumn(column, "New Column");
+		cellTable.addColumn(column, "NO.");
 
 		TextColumn<User> textColumn = new TextColumn<User>() {
 			@Override
@@ -124,22 +156,24 @@ public class MainWindowPanel extends Composite {
 
 		vtp.add(cellTable);
 
-		Column<User, String> modifyAction = new Column<User, String>(new ButtonCell()) {
+		Column<User, String> modifyAction = new Column<User, String>(
+				new ButtonCell()) {
 			@Override
 			public String getValue(User object) {
 				return "modify";
 			}
 		};
-		modifyAction.setFieldUpdater(new modifyFieldUpdater());
+		modifyAction.setFieldUpdater(new ModifyFieldUpdater());
 		cellTable.addColumn(modifyAction, "Modify");
 
-		Column<User, String> removeAction = new Column<User, String>(new ButtonCell()) {
+		Column<User, String> removeAction = new Column<User, String>(
+				new ButtonCell()) {
 			@Override
 			public String getValue(User object) {
 				return "remove";
 			}
 		};
-		removeAction.setFieldUpdater(new removeFieldUpdater());
+		removeAction.setFieldUpdater(new RemoveFieldUpdater());
 		cellTable.addColumn(removeAction, "Remove");
 		vtp.add(pager);
 	}
@@ -174,18 +208,19 @@ public class MainWindowPanel extends Composite {
 	public CellTable<User> getCellTable() {
 		return cellTable;
 	}
-	
-	class modifyFieldUpdater implements FieldUpdater<User, String>{
+
+	class ModifyFieldUpdater implements FieldUpdater<User, String> {
 		@Override
 		public void update(int index, User object, String value) {
-			FormDialogBox registerDialogBox = new FormDialogBox(Type.Modify,object);
+			UserFormDialogBox registerDialogBox = new UserFormDialogBox(Type.Modify,
+					object);
 			registerDialogBox.setAnimationEnabled(true);
 			registerDialogBox.setText("Modify Information DialogBox");
 			registerDialogBox.center();
 		}
 	}
-	
-	class removeFieldUpdater implements FieldUpdater<User, String> {
+
+	class RemoveFieldUpdater implements FieldUpdater<User, String> {
 		@Override
 		public void update(int index, final User object, String value) {
 			userServiceAsync.deleteUser(object, new AsyncCallback<Boolean>() {
@@ -211,15 +246,29 @@ public class MainWindowPanel extends Composite {
 	public List<User> getUserlist() {
 		return userlist;
 	}
-}
-class createButtonClickHandler implements ClickHandler {
 
-	@Override
-	public void onClick(ClickEvent event) {
-		FormDialogBox registerDialogBox = new FormDialogBox(Type.Register,null);
-		registerDialogBox.setAnimationEnabled(true);
-		registerDialogBox.setText("Register DialogBox");
-		registerDialogBox.center();
+	class filesystemButtonClickHander implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			fileSystemUserInterfacePane = new FileSystemUserInterfacePane();
+			RootPanel.get("mainWin").remove(MainWindowPanel.getInstance());
+			RootPanel.get("mainWin").add(fileSystemUserInterfacePane);
+			fileSystemUserInterfacePane.checkIfDefaultFileExist(loginUser);
+			fileSystemUserInterfacePane.initWithUser(loginUser);
+		}
 	}
 
+	class createButtonClickHandler implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			UserFormDialogBox registerDialogBox = new UserFormDialogBox(Type.Register,
+					null);
+			registerDialogBox.setAnimationEnabled(true);
+			registerDialogBox.setText("Register DialogBox");
+			registerDialogBox.center();
+		}
+
+	}
 }

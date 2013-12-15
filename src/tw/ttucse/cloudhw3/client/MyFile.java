@@ -19,6 +19,7 @@ public class MyFile implements Serializable {
 
 	@Persistent
 	String fileFolder;
+	
 
 	@Persistent
 	String fileKey;
@@ -28,6 +29,10 @@ public class MyFile implements Serializable {
 
 	@Persistent
 	Integer fileType;
+	
+	public MyFile() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public MyFile(String filename, String fileKey, String fileFolder,
 			Integer fileType) {
@@ -75,6 +80,21 @@ public class MyFile implements Serializable {
 
 	public Integer getFileType() {
 		return fileType;
+	}
+	
+
+	
+	public static String  getTypeString(MyFile myFile) {
+		if (myFile.fileType == MyFile.TYPE_DIR) {
+			return "Floder";
+		}else if (myFile.fileType == MyFile.TYPE_FILE) {
+			return "File";
+		}
+		return null;
+	}
+	
+	public String getTypeName() {
+		return getTypeString(this);
 	}
 
 }

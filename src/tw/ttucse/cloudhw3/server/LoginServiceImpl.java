@@ -40,7 +40,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
 		} else {
 			System.out.println("Default user exist");
 		}
-		System.out.println("Done");
+		System.out.println("Done\n");
 	}
 
 	@Override

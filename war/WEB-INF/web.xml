@@ -15,6 +15,7 @@
     <servlet-name>LoginService</servlet-name>
     <url-pattern>/cloudapphw3/login</url-pattern>
   </servlet-mapping>
+  
   <servlet>
     <servlet-name>UserService</servlet-name>
     <servlet-class>tw.ttucse.cloudhw3.server.UserServiceImpl</servlet-class>
@@ -23,6 +24,16 @@
   <servlet-mapping>
     <servlet-name>UserService</servlet-name>
     <url-pattern>/cloudapphw3/user</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>FileService</servlet-name>
+    <servlet-class>tw.ttucse.cloudhw3.server.FileServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>FileService</servlet-name>
+    <url-pattern>/cloudapphw3/file</url-pattern>
   </servlet-mapping>
   
   
@@ -35,6 +46,7 @@
     <servlet-name>UploadServlet</servlet-name>
     <url-pattern>/cloudapphw3/upload</url-pattern>
   </servlet-mapping>
+  
   
   <!-- Default page to serve -->
   <welcome-file-list>

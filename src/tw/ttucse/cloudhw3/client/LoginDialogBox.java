@@ -17,10 +17,11 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class LoginDialogBox extends DialogBox implements ClickHandler{
 	private final LoginServiceAsync loginServiceAsync = GWT.create(LoginService.class);
-	LoginDialogBox thisPanel;
+	private LoginDialogBox thisPanel;
 	private PasswordTextBox password;
 	private TextBox accountTextBox;
-	Label errorMesssage;
+	private Label errorMesssage;
+	
 	public LoginDialogBox() {
 		loginServiceAsync.init(new AsyncCallback<Void>() {
 			@Override
@@ -67,7 +68,7 @@ public class LoginDialogBox extends DialogBox implements ClickHandler{
 	
 	@Override
 	public void onClick(ClickEvent event) {
-		String account = accountTextBox.getText();
+		final String account = accountTextBox.getText();
 		String pwd = password.getText();
 		loginServiceAsync.login(account, pwd, new AsyncCallback<Boolean>() {
 			
@@ -76,27 +77,40 @@ public class LoginDialogBox extends DialogBox implements ClickHandler{
 				if(!result){
 					errorMesssage.setText("帳號或密碼有誤");
 				} else {
-					RootPanel.get("mainWin").add(new MainWindowPanel());
-					final DialogBox dialogBox = new DialogBox();
-					dialogBox.setText("Remote Message.");
-					dialogBox.setAnimationEnabled(true);
-					Button btn = new Button("Close.");
-					btn.addClickHandler(new ClickHandler() {
-						
+					UserServiceAsync userServiceAsync = GWT.create(UserService.class);
+					userServiceAsync.getUser(account, new AsyncCallback<User>() {
+
 						@Override
-						public void onClick(ClickEvent event) {
-							dialogBox.hide();							
+						public void onFailure(Throwable caught) {
+							System.out.println("error");
+						}
+
+						@Override
+						public void onSuccess(User result) {
+							System.out.println(result.getUsername());
+							MainWindowPanel mainWindowPanel = new MainWindowPanel(result);
+							RootPanel.get("mainWin").add(mainWindowPanel);
+							final DialogBox dialogBox = new DialogBox();
+							dialogBox.setText("Remote Message.");
+							dialogBox.setAnimationEnabled(true);
+							Button btn = new Button("Close.");
+							btn.addClickHandler(new ClickHandler() {
+								
+								@Override
+								public void onClick(ClickEvent event) {
+									dialogBox.hide();							
+								}
+							});
+							VerticalPanel verticalPanel = new VerticalPanel();
+							verticalPanel.add(new HTML("<br><b>Login Success.</b><br>"));
+							verticalPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+							verticalPanel.add(btn);
+							dialogBox.setWidget(verticalPanel);
+							thisPanel.hide();
+							dialogBox.center();
 						}
 					});
-					VerticalPanel verticalPanel = new VerticalPanel();
-					verticalPanel.add(new HTML("<br><b>Login Success.</b><br>"));
-					verticalPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-					verticalPanel.add(btn);
-					dialogBox.setWidget(verticalPanel);
-					thisPanel.hide();
-					dialogBox.center();
-				}
-				
+				}				
 			}
 			
 			@Override

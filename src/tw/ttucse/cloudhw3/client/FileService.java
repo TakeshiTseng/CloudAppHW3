@@ -1,12 +1,23 @@
 package tw.ttucse.cloudhw3.client;
 
-import java.util.List;
-
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-public interface FileService extends RemoteService{
-	List<MyFile> getFilesWithParent(String parent) throws IllegalArgumentException;
-	List<MyFile> getParents() throws IllegalArgumentException;
-	Boolean createFolder(String parent, String name) throws IllegalArgumentException;
-	Boolean deleteFile(MyFile file) throws IllegalArgumentException;
+@RemoteServiceRelativePath("file")
+public interface FileService extends RemoteService {
+	MyFile[] getFilesWithParent(String parent)throws IllegalArgumentException;
+
+	MyFile[] getParents() throws IllegalArgumentException;
+
+	MyFile createFolder(String parent, String name)throws IllegalArgumentException;
+
+	MyFile deleteFile(MyFile file) throws IllegalArgumentException;
+	
+	void checkIfDefaultFileExist(User user) throws IllegalArgumentException;
+
+	MyFile editMyFile(MyFile myFile) throws IllegalArgumentException;
+	
+	void deleteSubFloder(String path) throws IllegalArgumentException;
+	
+	String getUploadURL() throws IllegalArgumentException;
 }
