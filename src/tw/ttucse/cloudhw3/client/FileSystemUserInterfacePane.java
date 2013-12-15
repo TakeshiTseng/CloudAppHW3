@@ -8,6 +8,7 @@ import tw.ttucse.cloudhw3.client.FloderFormDialogBox.Type;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -391,7 +392,10 @@ public class FileSystemUserInterfacePane extends Composite {
 				initWithMyfile(selectFile);
 				updateUI();
 			} else {
-
+				String blobKeyString = selectFile.getFileKey();
+				String fileName = selectFile.getName();
+				String downloadURL = "http://127.0.0.1:8888/cloudapphw3/download?blob-key=" + blobKeyString + "&fileName=" + fileName; 
+				Window.Location.assign(downloadURL);
 			}
 		}
 	}

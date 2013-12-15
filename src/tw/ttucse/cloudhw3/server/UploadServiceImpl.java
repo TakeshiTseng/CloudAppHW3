@@ -77,11 +77,12 @@ public class UploadServiceImpl extends HttpServlet {
 			String fileKey = blobInfo.getBlobKey().getKeyString();
 			String fileParent = req.getParameter("parent");
 			MyFile myFile = new MyFile(filename, fileKey, fileParent, MyFile.TYPE_FILE);
-			String queryStatment = "SELECT FROM " + MyFile.class.getName() + " WHERE name == \'"+filename+"\'";//"\' AND fileFolder == \'" + fileParent + "\';";
+			String queryStatment = "SELECT FROM " + MyFile.class.getName() + " WHERE name == \'"+filename+"\' && fileFolder == \'" + fileParent + "\'";
+			System.out.println("queryStatment : " + queryStatment);
 			Query query = pm.newQuery(queryStatment);
 			
 			List<MyFile> queryResult = (List<MyFile>) query.execute();
-			
+			System.out.println("Result size : " + queryResult.size());
 			if(queryResult.size() == 0){
 				queryStatment = "SELECT FROM " + MyFile.class.getName() ;
 				query = pm.newQuery(queryStatment);
@@ -91,9 +92,13 @@ public class UploadServiceImpl extends HttpServlet {
 				
 				pm.makePersistent(myFile);
 				pm.flush();
+				resp.setContentType("text/html");
+				resp.getWriter().println("Upload OK");
+			} else {
+				resp.setContentType("text/html");
+				resp.getWriter().println("Error!");
 			}
-			resp.setContentType("text/html");
-			resp.getWriter().println("Upload OK");
+			
 		} else {
 			resp.setContentType("text/html");
 			resp.getWriter().println("File Error!");
