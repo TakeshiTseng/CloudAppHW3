@@ -84,11 +84,15 @@ public class UploadServiceImpl extends HttpServlet {
 			List<MyFile> queryResult = (List<MyFile>) query.execute();
 			System.out.println("Result size : " + queryResult.size());
 			if(queryResult.size() == 0){
-				queryStatment = "SELECT FROM " + MyFile.class.getName() ;
-				query = pm.newQuery(queryStatment);
 				
-				queryResult = (List<MyFile>) query.execute();
-				myFile.setId((long) (queryResult.size() +1));
+				String query2 = "SELECT MAX(id) FROM " + MyFile.class.getName();
+				Long ID = (Long) pm.newQuery(query2).execute();
+				if (ID == null) {
+					ID = new Long(1);
+				}
+				
+				
+				myFile.setId(ID +1);
 				
 				pm.makePersistent(myFile);
 				pm.flush();

@@ -5,10 +5,13 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.jdo.Extent;
+
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
+
+import org.w3c.css.sac.SiblingSelector;
 
 import tw.ttucse.cloudhw3.client.FileService;
 import tw.ttucse.cloudhw3.client.MyFile;
@@ -101,24 +104,41 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 	public MyFile deleteFile(MyFile file) throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 		Transaction transaction = pm.currentTransaction();
-		if (file.getName().equals("/")) {
+		Query query;
+		List<MyFile> files;
+		
+		if (file.getName().equals("/") || file.getName().equals(".")) {
 			return null;
 		}
-		Object obj=null;
-		try {
-			transaction.begin();
-			Extent<MyFile> ext = pm.getExtent(MyFile.class, false);
-			String str = "id=="+file.getId();
-			Query qry = pm.newQuery(ext, str);
-			Collection<?> c = (Collection<?>) qry.execute();
-			obj = c.iterator().next();
-			pm.deletePersistent(obj);
-			transaction.commit();
-		} catch (Exception ex) {
-			transaction.rollback();
-			throw ex;
+		
+		query = pm.newQuery("select from " + MyFile.class.getName() + " where id == " + file.getId());
+		files = (List<MyFile>) query.execute();
+		if(files.size() == 1){
+			file = files.get(0);
 		}
-		return (MyFile) obj;
+		
+		if(file.getFileType() == MyFile.TYPE_DIR){
+			String queryStatement = "SELECT FROM " + MyFile.class.getName();
+			query = pm.newQuery(queryStatement);
+			
+			files = (List<MyFile>) query.execute();
+			String path = file.getFileFolder() + "/" + file.getName();
+			System.out.println("Delete Path : " + path);
+			transaction.begin();
+			for(MyFile myFile : files){
+				if (myFile.getFileFolder().startsWith(path)) {
+					pm.deletePersistent(myFile);
+				}
+			}
+			pm.deletePersistent(file);
+			transaction.commit();
+		} else {
+			transaction.begin();
+			pm.deletePersistent(file);
+			transaction.commit();
+		}
+
+		return file;
 	}
 
 	@Override

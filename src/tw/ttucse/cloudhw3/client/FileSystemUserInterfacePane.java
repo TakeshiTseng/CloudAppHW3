@@ -358,6 +358,22 @@ public class FileSystemUserInterfacePane extends Composite {
 					selectIndex = i;
 				}
 			}
+			fileServiceAsync.deleteFile(selectFile, new AsyncCallback<MyFile>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+					System.out.println("File delete failure");
+					
+				}
+
+				@Override
+				public void onSuccess(MyFile result) {
+					fileList.remove(selectIndex);
+					flexTable.removeRow(selectIndex + 1);
+					
+				}
+			});
+			/*
 			fileServiceAsync.deleteSubFloder(selectFile.getFileFolder() + "/"
 					+ selectFile.getName() + "/", new AsyncCallback<Void>() {
 
@@ -373,6 +389,7 @@ public class FileSystemUserInterfacePane extends Composite {
 
 				}
 			});
+			*/
 		}
 	}
 
