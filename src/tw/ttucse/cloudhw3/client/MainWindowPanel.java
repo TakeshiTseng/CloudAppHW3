@@ -27,6 +27,15 @@ public class MainWindowPanel extends Composite {
 	private SingleSelectionModel<User> selectionModel;
 	private FileSystemUserInterfacePane fileSystemUserInterfacePane;
 	private User loginUser;
+	private MyFile myFile;
+
+	public MyFile getMyFile() {
+		return myFile;
+	}
+
+	public void setMyFile(MyFile myFile) {
+		this.myFile = myFile;
+	}
 
 	public User getLoginUser() {
 		return loginUser;
@@ -34,12 +43,29 @@ public class MainWindowPanel extends Composite {
 
 	public void setLoginUser(User loginUser) {
 		this.loginUser = loginUser;
+		fileServiceAsync.getFileWithName(loginUser.getAccount(), ".", true,
+				new AsyncCallback<MyFile>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(MyFile result) {
+						System.out.println("Get Mydile: "
+								+ result.getFileFolder() + "/"
+								+ result.getName());
+						setMyFile(result);
+					}
+				});
 	}
 
 	public static MainWindowPanel getInstance() {
 		return instance;
 	}
-	
+
 	public FileSystemUserInterfacePane getFileSystemUserInterfacePane() {
 		return fileSystemUserInterfacePane;
 	}
@@ -48,11 +74,14 @@ public class MainWindowPanel extends Composite {
 	private final UserServiceAsync userServiceAsync = GWT
 			.create(UserService.class);
 
+	private final FileServiceAsync fileServiceAsync = GWT
+			.create(FileService.class);
+
 	public MainWindowPanel(User user) {
 		this();
 		setLoginUser(user);
 	}
-	
+
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -212,8 +241,8 @@ public class MainWindowPanel extends Composite {
 	class ModifyFieldUpdater implements FieldUpdater<User, String> {
 		@Override
 		public void update(int index, User object, String value) {
-			UserFormDialogBox registerDialogBox = new UserFormDialogBox(Type.Modify,
-					object);
+			UserFormDialogBox registerDialogBox = new UserFormDialogBox(
+					Type.Modify, object);
 			registerDialogBox.setAnimationEnabled(true);
 			registerDialogBox.setText("Modify Information DialogBox");
 			registerDialogBox.center();
@@ -223,23 +252,48 @@ public class MainWindowPanel extends Composite {
 	class RemoveFieldUpdater implements FieldUpdater<User, String> {
 		@Override
 		public void update(int index, final User object, String value) {
-			userServiceAsync.deleteUser(object, new AsyncCallback<Boolean>() {
 
-				@Override
-				public void onFailure(Throwable caught) {
-					Window.alert("Connent failure !");
-				}
+			if (loginUser.getAccount().equals(object.getAccount())) {
+				userServiceAsync.deleteUser(object,
+						new AsyncCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(Boolean result) {
-					if (result) {
-						userlist.remove(object);
-						updatadisplay();
-					} else {
-						Window.alert("Remove failure");
-					}
-				}
-			});
+							@Override
+							public void onFailure(Throwable caught) {
+								Window.alert("Connent failure !");
+							}
+
+							@Override
+							public void onSuccess(Boolean result) {
+								if (result) {
+									userlist.remove(object);
+									updatadisplay();
+								} else {
+									Window.alert("Remove failure");
+								}
+							}
+						});
+				System.out.println(myFile);
+				fileServiceAsync.deleteFloder(myFile,
+						new AsyncCallback<Boolean>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								System.out
+										.println("MainWindowPanel.RemoveFieldUpdater.update(...).new AsyncCallback() {...}.onFailure()");
+							}
+
+							@Override
+							public void onSuccess(Boolean result) {
+								if (result) {									
+								System.out
+										.println("Delete User subFolder success");
+								}
+							}
+						});
+			} else {
+				Window.alert("非帳號本人，處裡失敗!");
+			}
+
 		}
 	}
 
@@ -263,8 +317,8 @@ public class MainWindowPanel extends Composite {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			UserFormDialogBox registerDialogBox = new UserFormDialogBox(Type.Register,
-					null);
+			UserFormDialogBox registerDialogBox = new UserFormDialogBox(
+					Type.Register, null);
 			registerDialogBox.setAnimationEnabled(true);
 			registerDialogBox.setText("Register DialogBox");
 			registerDialogBox.center();

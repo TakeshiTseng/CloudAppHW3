@@ -92,6 +92,7 @@ public class UserFormDialogBox extends DialogBox implements ClickHandler {
 	@Override
 	public void onClick(ClickEvent event) {
 		UserServiceAsync userServiceAsync = GWT.create(UserService.class);
+		FileServiceAsync fileServiceAsync = GWT.create(FileService.class);
 		String account = accountTextBox.getText();
 		final String pwd = password.getText();
 		final String username = usernameTextBox.getText();
@@ -129,6 +130,17 @@ public class UserFormDialogBox extends DialogBox implements ClickHandler {
 
 		if (type == Type.Register) {
 			userServiceAsync.addUser(user, callback);
+			fileServiceAsync.createFolder(".", user.getAccount(), new AsyncCallback<MyFile>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+				}
+
+				@Override
+				public void onSuccess(MyFile result) {
+					System.out.println("Create User subFolder success");
+				}
+			});
 		} else {
 			userServiceAsync.editUser(user, callback);
 		}

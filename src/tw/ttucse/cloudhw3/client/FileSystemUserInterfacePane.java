@@ -85,7 +85,7 @@ public class FileSystemUserInterfacePane extends Composite {
 		label.setStyleName("FileSystemUI_Title");
 		absolutePanel.add(label, 324, 0);
 
-		Button btnNewButton = new Button("Test");
+		Button btnNewButton = new Button("Print All File to Console");
 		btnNewButton.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -149,7 +149,8 @@ public class FileSystemUserInterfacePane extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO
-				UploadPanel uploadPanel = new UploadPanel(path);
+				UploadPanelDialogBox uploadPanel = new UploadPanelDialogBox(
+						myFile);
 				uploadPanel.center();
 			}
 		});
@@ -276,6 +277,10 @@ public class FileSystemUserInterfacePane extends Composite {
 		int row = flexTable.getRowCount();
 		Button filebtn = new Button(myFile.getName());
 		filebtn.addClickHandler(new MyfileClickHandler());
+		if (myFile.getFileType() == MyFile.TYPE_DIR) {
+			filebtn.setStyleName("fileButton");
+		}
+
 		Button modiftbtn = new Button("Modify");
 		modiftbtn.addClickHandler(new ModifyButtonClickHandler());
 		modiftbtn.setTitle(myFile.getName());
@@ -358,38 +363,52 @@ public class FileSystemUserInterfacePane extends Composite {
 					selectIndex = i;
 				}
 			}
-			fileServiceAsync.deleteFile(selectFile, new AsyncCallback<MyFile>() {
 
-				@Override
-				public void onFailure(Throwable caught) {
-					System.out.println("File delete failure");
-					
-				}
+			if (selectFile.getFileType() == MyFile.TYPE_DIR) {
+				fileServiceAsync.deleteFloder(selectFile,
+						new AsyncCallback<Boolean>() {
 
-				@Override
-				public void onSuccess(MyFile result) {
-					fileList.remove(selectIndex);
-					flexTable.removeRow(selectIndex + 1);
-					
-				}
-			});
+							@Override
+							public void onFailure(Throwable caught) {
+								System.out.println("File delete failure");
+							}
+
+							@Override
+							public void onSuccess(Boolean result) {
+								fileList.remove(selectIndex);
+								flexTable.removeRow(selectIndex + 1);
+							}
+						});
+			} else {
+				fileServiceAsync.deleteFile(selectFile,
+						new AsyncCallback<MyFile>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								System.out.println("File delete failure");
+							}
+
+							@Override
+							public void onSuccess(MyFile result) {
+								fileList.remove(selectIndex);
+								flexTable.removeRow(selectIndex + 1);
+							}
+						});
+			}
+
 			/*
-			fileServiceAsync.deleteSubFloder(selectFile.getFileFolder() + "/"
-					+ selectFile.getName() + "/", new AsyncCallback<Void>() {
-
-				@Override
-				public void onFailure(Throwable caught) {
-					System.out.println("File delete failure");
-				}
-
-				@Override
-				public void onSuccess(Void result) {
-					fileList.remove(selectIndex);
-					flexTable.removeRow(selectIndex + 1);
-
-				}
-			});
-			*/
+			 * fileServiceAsync.deleteSubFloder(selectFile.getFileFolder() + "/"
+			 * + selectFile.getName() + "/", new AsyncCallback<Void>() {
+			 * 
+			 * @Override public void onFailure(Throwable caught) {
+			 * System.out.println("File delete failure"); }
+			 * 
+			 * @Override public void onSuccess(Void result) {
+			 * fileList.remove(selectIndex); flexTable.removeRow(selectIndex +
+			 * 1);
+			 * 
+			 * } });
+			 */
 		}
 	}
 
@@ -411,7 +430,9 @@ public class FileSystemUserInterfacePane extends Composite {
 			} else {
 				String blobKeyString = selectFile.getFileKey();
 				String fileName = selectFile.getName();
-				String downloadURL = "http://127.0.0.1:8888/cloudapphw3/download?blob-key=" + blobKeyString + "&fileName=" + fileName; 
+				
+				String downloadURL = "/cloudapphw3/download?blob-key="
+						+ blobKeyString + "&fileName=" + fileName;
 				Window.Location.assign(downloadURL);
 			}
 		}

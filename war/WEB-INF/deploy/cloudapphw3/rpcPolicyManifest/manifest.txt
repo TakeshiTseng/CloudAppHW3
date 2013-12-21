@@ -1,2 +1,5 @@
 # Module cloudapphw3
 # RPC service class, partial path of RPC policy file
+tw.ttucse.cloudhw3.client.FileService, BCEFE838A0ED959D8B00E65F84AAC91C.gwt.rpc
+tw.ttucse.cloudhw3.client.LoginService, 73057980C3BDB30ED9FDC1E667BFC6F0.gwt.rpc
+tw.ttucse.cloudhw3.client.UserService, C14DFE3A870FC3F1B6176BD96AD8CD28.gwt.rpc

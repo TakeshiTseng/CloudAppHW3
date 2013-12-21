@@ -5,13 +5,10 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.jdo.Extent;
-
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
-
-import org.w3c.css.sac.SiblingSelector;
 
 import tw.ttucse.cloudhw3.client.FileService;
 import tw.ttucse.cloudhw3.client.MyFile;
@@ -32,6 +29,65 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 
 	private static final long serialVersionUID = 8169459258144511133L;
 
+
+	@Override
+	public MyFile getFileWithName(String name, String parent)
+			throws IllegalArgumentException {
+		return getFileWithName(name,parent,false);
+	}
+
+	@Override
+	public MyFile getFileWithName(String name, String parent, boolean isSure)
+			throws IllegalArgumentException {
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+
+		String queryString = "name ==\'"+ name+"\' && fileFolder == \'" + parent + "\'";
+		List<MyFile> files;
+		do{
+			@SuppressWarnings("unchecked")
+			List<MyFile> list = (List<MyFile>) pm.newQuery(MyFile.class,
+				queryString).execute();
+			files=list;
+			isSure=isSure&&files.isEmpty();
+		}while(isSure);
+
+		return files.isEmpty()? null:files.get(0);
+	}
+	
+	@Override
+	public Long getNewID() throws IllegalArgumentException {
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+		String query2 = "SELECT MAX(id) FROM " + MyFile.class.getName();
+		Long ID = (Long) pm.newQuery(query2).execute();
+		if (ID == null) {
+			ID = new Long(1);
+		}
+		pm.close();
+		return ID+1;
+	}
+
+	@Override
+	public MyFile getFileWithID(Long ID) throws IllegalArgumentException {
+		return getFileWithID(ID,false);
+	}
+	
+	@Override
+	public MyFile getFileWithID(Long ID,boolean isSure) throws IllegalArgumentException {
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+
+		String queryString = "id =="+ ID;
+		List<MyFile> files;
+		do{
+			@SuppressWarnings("unchecked")
+			List<MyFile> list = (List<MyFile>) pm.newQuery(MyFile.class,
+				queryString).execute();
+			files=list;
+			isSure=isSure&&files.isEmpty();
+		}while(isSure);
+
+		return files.isEmpty()? null:files.get(0);
+	}
+	
 	@Override
 	public MyFile[] getFilesWithParent(String parent)
 			throws IllegalArgumentException {
@@ -68,8 +124,9 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		}
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 		try {
+			Long ID =getNewID();
 			String query = "name == \'" + name + "\' && fileFolder == \'"
-					+ parent + "\' && fileType == " + MyFile.TYPE_DIR;
+					+ parent + "\' && fileType == " + MyFile.TYPE_DIR+" && id=="+ID;
 
 			@SuppressWarnings("unchecked")
 			List<MyFile> dirs = (List<MyFile>) pm.newQuery(MyFile.class, query)
@@ -78,13 +135,8 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 				System.out.println("Create not OK!");
 				return null;
 			} else {
-				String query2 = "SELECT MAX(id) FROM " + MyFile.class.getName();
-				Long ID = (Long) pm.newQuery(query2).execute();
-				if (ID == null) {
-					ID = new Long(1);
-				}
 				MyFile dir = new MyFile(name, null, parent, MyFile.TYPE_DIR);
-				dir.setId(ID + 1);
+				dir.setId(ID);
 				pm.makePersistent(dir);
 				pm.flush();
 				System.out.println("Create folder OK!");
@@ -100,45 +152,98 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 
 	}
 
+//	@Override
+//	public MyFile deleteFile(MyFile file) throws IllegalArgumentException {
+//		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+//		Transaction transaction = pm.currentTransaction();
+//		Query query;
+//		List<MyFile> files;
+//		
+//		if (file.getName().equals("/") || file.getName().equals(".")) {
+//			return null;
+//		}
+//		
+//		query = pm.newQuery("select from " + MyFile.class.getName() + " where id == " + file.getId());
+//		files = (List<MyFile>) query.execute();
+//		if(files.size() == 1){
+//			file = files.get(0);
+//		}
+//		
+//		if(file.getFileType() == MyFile.TYPE_DIR){
+//			String queryStatement = "SELECT FROM " + MyFile.class.getName();
+//			query = pm.newQuery(queryStatement);
+//			
+//			files = (List<MyFile>) query.execute();
+//			String path = file.getFileFolder() + "/" + file.getName();
+//			System.out.println("Delete Path : " + path);
+//			transaction.begin();
+//			for(MyFile myFile : files){
+//				if (myFile.getFileFolder().startsWith(path)) {
+//					pm.deletePersistent(myFile);
+//				}
+//			}
+//			pm.deletePersistent(file);
+//			transaction.commit();
+//		} else {
+//			transaction.begin();
+//			pm.deletePersistent(file);
+//			transaction.commit();
+//		}
+//
+//		return file;
+//	}
+	
 	@Override
 	public MyFile deleteFile(MyFile file) throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 		Transaction transaction = pm.currentTransaction();
-		Query query;
-		List<MyFile> files;
-		
-		if (file.getName().equals("/") || file.getName().equals(".")) {
-			return null;
-		}
-		
-		query = pm.newQuery("select from " + MyFile.class.getName() + " where id == " + file.getId());
-		files = (List<MyFile>) query.execute();
-		if(files.size() == 1){
-			file = files.get(0);
-		}
-		
-		if(file.getFileType() == MyFile.TYPE_DIR){
-			String queryStatement = "SELECT FROM " + MyFile.class.getName();
-			query = pm.newQuery(queryStatement);
-			
-			files = (List<MyFile>) query.execute();
-			String path = file.getFileFolder() + "/" + file.getName();
-			System.out.println("Delete Path : " + path);
+		String filepath = file.getFileFolder()+"/"+file.getName();
+		Object obj=null;
+		try {
+			Extent<MyFile> ext = pm.getExtent(MyFile.class, false);
+			String str = "id=="+file.getId();
+			Query qry = pm.newQuery(ext, str);
+			Collection<?> c = (Collection<?>) qry.execute();
+			obj = c.iterator().next();
 			transaction.begin();
-			for(MyFile myFile : files){
-				if (myFile.getFileFolder().startsWith(path)) {
-					pm.deletePersistent(myFile);
+			pm.deletePersistent(obj);
+			transaction.commit();
+			System.out.println("Delete Path : " + filepath);
+		} catch (Exception ex) {
+			transaction.rollback();
+			throw ex;
+		}
+		return (MyFile) obj;
+	}
+
+	@Override
+	public boolean deleteFloder(MyFile file) throws IllegalArgumentException {
+		if(file.getFileType() == MyFile.TYPE_FILE){
+			return false;
+		}
+		String path = file.getFileFolder()+"/"+file.getName()+"/";
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+		MyFile[] myFilesattay;
+		String queryString = "SELECT FROM " + MyFile.class.getName();
+		try {
+			@SuppressWarnings("unchecked")
+			List<MyFile> dirs = (List<MyFile>) pm.newQuery(queryString)
+					.execute();
+			myFilesattay = dirs.toArray(new MyFile[dirs.size()]);
+			ArrayList<MyFile> myFileslist = new ArrayList<MyFile>();
+			for (MyFile myFile : myFilesattay) {
+				if ((myFile.getFileFolder()+"/").startsWith(path)) {
+					myFileslist.add(myFile);
 				}
 			}
-			pm.deletePersistent(file);
-			transaction.commit();
-		} else {
-			transaction.begin();
-			pm.deletePersistent(file);
-			transaction.commit();
+			myFileslist.add(file);
+			for (MyFile myFile : myFileslist) {
+				deleteFile(myFile);
+			}
+		} finally {
+			pm.close();
 		}
-
-		return file;
+		return true;
 	}
 
 	@Override
@@ -208,32 +313,6 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		modifySubFloder(oldParentString,newParentString);
 		return oldfile;
 	}
-	
-	@Override
-	public void deleteSubFloder(String path) {
-		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
-		MyFile[] myFilesattay;
-		String queryString = "SELECT FROM " + MyFile.class.getName();
-		try {
-			@SuppressWarnings("unchecked")
-			List<MyFile> dirs = (List<MyFile>) pm.newQuery(queryString)
-					.execute();
-			myFilesattay = dirs.toArray(new MyFile[dirs.size()]);
-			ArrayList<MyFile> myFileslist = new ArrayList<MyFile>();
-			System.out.println(1);
-			for (MyFile myFile : myFilesattay) {
-				System.err.println(path+" "+myFile.getFileFolder()+"/");
-				if ((myFile.getFileFolder()+"/"+myFile.getName()+"/").startsWith(path)) {
-					myFileslist.add(myFile);
-				}
-			}
-			for (MyFile myFile : myFileslist) {
-				deleteFile(myFile);
-			}
-		} finally {
-			pm.close();
-		}
-	}
 
 	public void modifySubFloder(String oldFolderString, String newFolderString) {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
@@ -258,6 +337,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 				folderString = newFolderString
 						+ folderString.substring(oldFolderStringLen);
 				folderString=folderString.substring(0,folderString.length()-1);
+				System.out.println("Modify : "+myFile.getFileFolder()+"/"+myFile.getName()+" => "+folderString+"/"+myFile.getName());
 				myFile.setFileFolder(folderString);
 
 				try {
@@ -279,5 +359,4 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		String url = blobstoreService.createUploadUrl("/cloudapphw3/upload");
 		return url;
 	}
-
 }
