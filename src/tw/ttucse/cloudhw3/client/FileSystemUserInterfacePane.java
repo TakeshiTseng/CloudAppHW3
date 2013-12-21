@@ -11,15 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.*;
 
 public class FileSystemUserInterfacePane extends Composite {
 	private static FileSystemUserInterfacePane instance;
@@ -27,6 +19,7 @@ public class FileSystemUserInterfacePane extends Composite {
 	private MyFile myFile;
 	private Stack<MyFile> myfileStack = new Stack<MyFile>();
 	private Button backButton;
+	private ArrayList<MyFile> fileList;
 
 	public MyFile getMyFile() {
 		return myFile;
@@ -46,7 +39,6 @@ public class FileSystemUserInterfacePane extends Composite {
 
 	private final FileServiceAsync fileServiceAsync = GWT
 			.create(FileService.class);
-	private ArrayList<MyFile> fileList;
 
 	public ArrayList<MyFile> getFileList() {
 		return fileList;
@@ -144,22 +136,37 @@ public class FileSystemUserInterfacePane extends Composite {
 
 		Button button_2 = new Button("Upload File");
 		horizontalPanel_1.add(button_2);
+
 		button_2.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO
 				UploadPanelDialogBox uploadPanel = new UploadPanelDialogBox(
 						myFile);
 				uploadPanel.center();
 			}
 		});
+		
+		Label label_2 = new Label("　　　　");
+		horizontalPanel_1.add(label_2);
+		
+		Button button_3 = new Button("Share Files");
+		horizontalPanel_1.add(button_3);
+		button_3.addClickHandler(new ClickHandler() {
 
+			@Override
+			public void onClick(ClickEvent event) {
+				ShareFilePanelDialogBox shareFilePanelDialogBox = new ShareFilePanelDialogBox(
+						fileList);
+				shareFilePanelDialogBox.center();
+			}
+		}); 
+		
 		HorizontalPanel horizontalPanel_2 = new HorizontalPanel();
 		horizontalPanel_2
 				.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		verticalPanel.add(horizontalPanel_2);
-		horizontalPanel_2.setSize("800px", "502px");
+		horizontalPanel_2.setSize("800px", "600px");
 
 		VerticalPanel verticalPanel_1 = new VerticalPanel();
 		verticalPanel_1
