@@ -1,0 +1,2 @@
+serviceClass: tw.ttucse.cloudhw3.client.UserService
+path: C14DFE3A870FC3F1B6176BD96AD8CD28.gwt.rpc

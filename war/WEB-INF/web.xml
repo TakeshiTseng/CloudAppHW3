@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee">
+
+  <!-- Servlets -->
+  <servlet>
+    <servlet-name>LoginService</servlet-name>
+    <servlet-class>tw.ttucse.cloudhw3.server.LoginServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>LoginService</servlet-name>
+    <url-pattern>/cloudapphw3/login</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>UserService</servlet-name>
+    <servlet-class>tw.ttucse.cloudhw3.server.UserServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>UserService</servlet-name>
+    <url-pattern>/cloudapphw3/user</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>FileService</servlet-name>
+    <servlet-class>tw.ttucse.cloudhw3.server.FileServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>FileService</servlet-name>
+    <url-pattern>/cloudapphw3/file</url-pattern>
+  </servlet-mapping>
+  
+  
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <servlet-class>tw.ttucse.cloudhw3.server.UploadServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/cloudapphw3/upload</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>DownloadServlet</servlet-name>
+    <servlet-class>tw.ttucse.cloudhw3.server.DownloadServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>DownloadServlet</servlet-name>
+    <url-pattern>/cloudapphw3/download</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>CloudAppHW3.html</welcome-file>
+  </welcome-file-list>
+
+</web-app>
