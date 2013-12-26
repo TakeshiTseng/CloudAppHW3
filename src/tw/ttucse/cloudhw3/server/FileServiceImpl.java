@@ -13,12 +13,18 @@ import javax.jdo.Transaction;
 import tw.ttucse.cloudhw3.client.FileService;
 import tw.ttucse.cloudhw3.client.MyFile;
 import tw.ttucse.cloudhw3.client.PMF;
+<<<<<<< HEAD
 import tw.ttucse.cloudhw3.client.ShareLink;
+=======
+>>>>>>> f0902c9cdd07514e01b9e8db887536aa8dffd5ba
 import tw.ttucse.cloudhw3.client.User;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+<<<<<<< HEAD
 import com.google.cloud.sql.jdbc.PreparedStatement;
+=======
+>>>>>>> f0902c9cdd07514e01b9e8db887536aa8dffd5ba
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class FileServiceImpl extends RemoteServiceServlet implements
@@ -362,6 +368,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		return url;
 	}
 
+
 	@Override
 	public void addFileToShareLink(Long fileId, String shareLinkName,
 			String owner) throws IllegalArgumentException {
@@ -403,4 +410,5 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 			
 		}
 	}
+
 }

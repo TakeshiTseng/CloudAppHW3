@@ -43,4 +43,5 @@ public interface FileServiceAsync {
 
 	void addFileToShareLink(Long fileId, String shareLinkName, String owner,
 			AsyncCallback<Void> callback);
+
 }
