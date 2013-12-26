@@ -373,6 +373,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		List<ShareLink> shareLinks = (List<ShareLink>) query.execute();
 		if(shareLinks.size() == 0){
 			// share link not exist
+			
 			ShareLink shareLink = new ShareLink(shareLinkName, owner);
 			List<Long> fileList = shareLink.getFilesIDList();
 			fileList.add(fileId);
