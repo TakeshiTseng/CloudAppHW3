@@ -35,7 +35,14 @@ public interface FileService extends RemoteService {
 	MyFile getFileWithName(String name, String parent, boolean isSure)
 			throws IllegalArgumentException;
 
-	void addFileToShareLink(Long fileId, String shareLinkName, String owner)
+	void addFileToShareLink(Long[] fileId, String shareLinkName, String owner)
 			throws IllegalArgumentException;
 
+	ShareLink[] getShareLinks() throws IllegalArgumentException;
+
+	ShareLink[] getShareLinksWithOwner(String owner)
+			throws IllegalArgumentException;
+
+	ShareLink[] getShareLinksWithShareName(String keyword)
+			throws IllegalArgumentException;
 }

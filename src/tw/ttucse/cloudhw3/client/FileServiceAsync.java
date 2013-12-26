@@ -41,7 +41,18 @@ public interface FileServiceAsync {
 	void getFileWithName(String name, String parent, boolean isSure,
 			AsyncCallback<MyFile> callback) throws IllegalArgumentException;
 
-	void addFileToShareLink(Long fileId, String shareLinkName, String owner,
-			AsyncCallback<Void> callback);
+	void addFileToShareLink(Long[] fileId, String shareLinkName, String owner,
+			AsyncCallback<Void> callback) throws IllegalArgumentException;
+
+	void getShareLinks(AsyncCallback<ShareLink[]> callback)
+			throws IllegalArgumentException;
+
+	void getShareLinksWithOwner(String owner,
+			AsyncCallback<ShareLink[]> callback)
+			throws IllegalArgumentException;
+
+	void getShareLinksWithShareName(String keyword,
+			AsyncCallback<ShareLink[]> callback)
+			throws IllegalArgumentException;
 
 }

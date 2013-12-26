@@ -93,7 +93,7 @@ public class FileSystemUserInterfacePane extends Composite {
 					public void onSuccess(MyFile[] result) {
 						System.out.println("\n*****\nAll file:");
 						for (MyFile file : result) {
-							System.out.println(file.getFileFolder() + "/"
+							System.out.println("ID:"+file.getId()+"\t\t"+file.getFileFolder() + "/"
 									+ file.getName());
 						}
 						System.out.println("*****\n");
@@ -102,6 +102,32 @@ public class FileSystemUserInterfacePane extends Composite {
 			}
 		});
 		absolutePanel.add(btnNewButton, 35, -3);
+		
+		Button btnNewButton_1 = new Button("New button");
+		absolutePanel.add(btnNewButton_1, 202, 0);
+		btnNewButton_1.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				fileServiceAsync.getShareLinks(new AsyncCallback<ShareLink[]>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						caught.printStackTrace();
+					}
+
+					@Override
+					public void onSuccess(ShareLink[] result) {
+						System.out.println("\n*****\nAll ShareLink:");
+						for (ShareLink shareLink : result) {
+							System.out.println("ID:"+shareLink.id+"\t\tOwner:"+shareLink.owner);
+							System.out.println(shareLink);
+						}
+						System.out.println("*****\n");
+					}
+				});
+			}
+		});
 
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
 		verticalPanel.add(horizontalPanel);

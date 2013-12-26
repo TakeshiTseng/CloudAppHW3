@@ -1,7 +1,6 @@
 package tw.ttucse.cloudhw3.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.PersistenceCapable;
@@ -23,10 +22,10 @@ public class ShareLink implements Serializable {
 	String owner;
 	
 	@Persistent
-	ArrayList<Long> filesIDList;
+	String idstr;
 	
 	public ShareLink() {
-		filesIDList = new ArrayList<Long>();
+		idstr="";
 	}
 
 	public ShareLink(String name,String owner){
@@ -59,11 +58,35 @@ public class ShareLink implements Serializable {
 		this.owner = owner;
 	}
 
-	public ArrayList<Long> getFilesIDList() {
-		return filesIDList;
+	public String getIdstr() {
+		return idstr;
 	}
 
-	public void setFilesIDList(ArrayList<Long> filesID) {
-		this.filesIDList = filesID;
+	public void setIdstr(String idstr) {
+		this.idstr = idstr;
+	}
+	
+	public void addID(Long ID) {
+		idstr=idstr+ID+",";
+	}
+	
+	public void remove(Long ID) {
+		if(idstr.startsWith(ID+",")){
+			idstr=idstr.split(ID+",")[1];
+			return;
+		}
+		String[] IDs = idstr.split(","+ID+",");
+		if (IDs.length==1) {
+			idstr=IDs[0];
+		}else{
+			idstr=IDs[0]+","+IDs[1];
+		}
+		
+		return;
+	}
+	
+	@Override
+	public String toString() {
+		return "{"+idstr.substring(0, idstr.length()-1)+"}";
 	}
 }

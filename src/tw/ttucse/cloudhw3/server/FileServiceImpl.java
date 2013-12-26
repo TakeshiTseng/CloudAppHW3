@@ -13,9 +13,7 @@ import javax.jdo.Transaction;
 import tw.ttucse.cloudhw3.client.FileService;
 import tw.ttucse.cloudhw3.client.MyFile;
 import tw.ttucse.cloudhw3.client.PMF;
-
 import tw.ttucse.cloudhw3.client.ShareLink;
-
 import tw.ttucse.cloudhw3.client.User;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
@@ -157,47 +155,6 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		}
 
 	}
-
-//	@Override
-//	public MyFile deleteFile(MyFile file) throws IllegalArgumentException {
-//		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
-//		Transaction transaction = pm.currentTransaction();
-//		Query query;
-//		List<MyFile> files;
-//		
-//		if (file.getName().equals("/") || file.getName().equals(".")) {
-//			return null;
-//		}
-//		
-//		query = pm.newQuery("select from " + MyFile.class.getName() + " where id == " + file.getId());
-//		files = (List<MyFile>) query.execute();
-//		if(files.size() == 1){
-//			file = files.get(0);
-//		}
-//		
-//		if(file.getFileType() == MyFile.TYPE_DIR){
-//			String queryStatement = "SELECT FROM " + MyFile.class.getName();
-//			query = pm.newQuery(queryStatement);
-//			
-//			files = (List<MyFile>) query.execute();
-//			String path = file.getFileFolder() + "/" + file.getName();
-//			System.out.println("Delete Path : " + path);
-//			transaction.begin();
-//			for(MyFile myFile : files){
-//				if (myFile.getFileFolder().startsWith(path)) {
-//					pm.deletePersistent(myFile);
-//				}
-//			}
-//			pm.deletePersistent(file);
-//			transaction.commit();
-//		} else {
-//			transaction.begin();
-//			pm.deletePersistent(file);
-//			transaction.commit();
-//		}
-//
-//		return file;
-//	}
 	
 	@Override
 	public MyFile deleteFile(MyFile file) throws IllegalArgumentException {
@@ -368,10 +325,10 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 
 
 	@Override
-	public void addFileToShareLink(Long fileId, String shareLinkName,
+	public void addFileToShareLink(Long[] fileId, String shareLinkName,
 			String owner) throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
-		String queryString = "SELECT FROM " + ShareLink.class.getName() + " WHERE shareName = \'" + shareLinkName + "\' && owner = \'" + owner + "\'"; 
+		String queryString = "SELECT FROM " + ShareLink.class.getName() + " WHERE shareName == \'" + shareLinkName + "\' && owner == \'" + owner + "\'"; 
 		Query query = pm.newQuery(queryString);
 		
 		@SuppressWarnings("unchecked")
@@ -380,8 +337,9 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 			// share link not exist
 			
 			ShareLink shareLink = new ShareLink(shareLinkName, owner);
-			List<Long> fileList = shareLink.getFilesIDList();
-			fileList.add(fileId);
+			for (Long id : fileId) {
+				shareLink.addID(id);
+			}
 			
 			try{
 				pm.makePersistent(shareLink);
@@ -393,20 +351,64 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		} else {
 			// share link exist
 			ShareLink shareLink = shareLinks.get(0);
-			
-			List<Long> fileList = shareLink.getFilesIDList();
-			fileList.add(fileId);
+			for (Long id : fileId) {
+				shareLink.addID(id);
+			}
 			Transaction transaction = pm.currentTransaction();
 			transaction.begin();
 			try{
 				pm.makePersistent(shareLink);
-				pm.flush();				
-			} finally{
+				pm.flush();	
+				transaction.commit();
+			}catch(Exception ex){
+				transaction.rollback();
+				ex.printStackTrace();
+			}finally{			
 				pm.close();
 			}
-			transaction.commit();
 			
 		}
+	}
+
+	@Override
+	public ShareLink[] getShareLinks() throws IllegalArgumentException {
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+		String queryString = "SELECT FROM " + ShareLink.class.getName();
+		try {
+			@SuppressWarnings("unchecked")
+			List<ShareLink> dirs = (List<ShareLink>) pm.newQuery(queryString)
+					.execute();
+			return dirs.toArray(new ShareLink[dirs.size()]);
+		} finally {
+			pm.close();
+		}
+	}
+
+	@Override
+	public ShareLink[] getShareLinksWithOwner(String owner)
+			throws IllegalArgumentException {
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+
+		String queryString = "owner == \'" + owner + "\'";
+		@SuppressWarnings("unchecked")
+		List<ShareLink> files = (List<ShareLink>) pm.newQuery(ShareLink.class,
+				queryString).execute();
+
+		return files.toArray(new ShareLink[files.size()]);
+	}
+
+	@Override
+	public ShareLink[] getShareLinksWithShareName(String keyword)
+			throws IllegalArgumentException {
+
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+
+		String queryString = "shareName == \'" + keyword + "\'";
+		@SuppressWarnings("unchecked")
+		List<ShareLink> files = (List<ShareLink>) pm.newQuery(ShareLink.class,
+				queryString).execute();
+
+		return files.toArray(new ShareLink[files.size()]);
 	}
 
 }
