@@ -13,10 +13,18 @@ import javax.jdo.Transaction;
 import tw.ttucse.cloudhw3.client.FileService;
 import tw.ttucse.cloudhw3.client.MyFile;
 import tw.ttucse.cloudhw3.client.PMF;
+<<<<<<< HEAD
+import tw.ttucse.cloudhw3.client.ShareLink;
+=======
+>>>>>>> f0902c9cdd07514e01b9e8db887536aa8dffd5ba
 import tw.ttucse.cloudhw3.client.User;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+<<<<<<< HEAD
+import com.google.cloud.sql.jdbc.PreparedStatement;
+=======
+>>>>>>> f0902c9cdd07514e01b9e8db887536aa8dffd5ba
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class FileServiceImpl extends RemoteServiceServlet implements
@@ -359,4 +367,48 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		String url = blobstoreService.createUploadUrl("/cloudapphw3/upload");
 		return url;
 	}
+
+
+	@Override
+	public void addFileToShareLink(Long fileId, String shareLinkName,
+			String owner) throws IllegalArgumentException {
+		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
+		String queryString = "SELECT FROM " + ShareLink.class.getName() + " WHERE shareName = \'" + shareLinkName + "\' && owner = \'" + owner + "\'"; 
+		Query query = pm.newQuery(queryString);
+		
+		@SuppressWarnings("unchecked")
+		List<ShareLink> shareLinks = (List<ShareLink>) query.execute();
+		if(shareLinks.size() == 0){
+			// share link not exist
+			
+			ShareLink shareLink = new ShareLink(shareLinkName, owner);
+			List<Long> fileList = shareLink.getFilesIDList();
+			fileList.add(fileId);
+			
+			try{
+				pm.makePersistent(shareLink);
+				pm.flush();				
+			} finally{
+				pm.close();
+			}
+			
+		} else {
+			// share link exist
+			ShareLink shareLink = shareLinks.get(0);
+			
+			List<Long> fileList = shareLink.getFilesIDList();
+			fileList.add(fileId);
+			Transaction transaction = pm.currentTransaction();
+			transaction.begin();
+			try{
+				pm.makePersistent(shareLink);
+				pm.flush();				
+			} finally{
+				pm.close();
+			}
+			transaction.commit();
+			
+		}
+	}
+
 }

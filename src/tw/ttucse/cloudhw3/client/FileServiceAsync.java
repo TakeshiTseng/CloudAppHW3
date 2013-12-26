@@ -40,4 +40,8 @@ public interface FileServiceAsync {
 
 	void getFileWithName(String name, String parent, boolean isSure,
 			AsyncCallback<MyFile> callback) throws IllegalArgumentException;
+
+	void addFileToShareLink(Long fileId, String shareLinkName, String owner,
+			AsyncCallback<Void> callback);
+
 }

@@ -21,14 +21,21 @@ public interface FileService extends RemoteService {
 	MyFile editMyFile(MyFile myFile) throws IllegalArgumentException;
 
 	String getUploadURL() throws IllegalArgumentException;
-	
+
 	Long getNewID() throws IllegalArgumentException;
-	
+
 	MyFile getFileWithID(Long ID) throws IllegalArgumentException;
-	
-	MyFile getFileWithID(Long ID,boolean isSure) throws IllegalArgumentException;
-	
-	MyFile getFileWithName(String name,String parent) throws IllegalArgumentException;
-	
-	MyFile getFileWithName(String name,String parent,boolean isSure) throws IllegalArgumentException;
+
+	MyFile getFileWithID(Long ID, boolean isSure)
+			throws IllegalArgumentException;
+
+	MyFile getFileWithName(String name, String parent)
+			throws IllegalArgumentException;
+
+	MyFile getFileWithName(String name, String parent, boolean isSure)
+			throws IllegalArgumentException;
+
+	void addFileToShareLink(Long fileId, String shareLinkName, String owner)
+			throws IllegalArgumentException;
+
 }
