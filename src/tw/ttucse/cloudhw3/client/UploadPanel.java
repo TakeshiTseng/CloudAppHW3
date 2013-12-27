@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import tw.ttucse.cloudhw3.client.File.FileType;
+
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.gwt.core.client.GWT;
@@ -23,7 +25,7 @@ public class UploadPanel extends Composite {
 	public UploadPanel() {
 
 		ArrayList<MyFile> folders = new ArrayList<>();
-		MyFile rootFile = new MyFile(".", null, null, MyFile.TYPE_DIR);
+		MyFile rootFile = new MyFile(".", null, null, FileType.DIR);
 		folders.add(rootFile);
 
 		FlexTable flexTable = new FlexTable();
@@ -89,7 +91,7 @@ public class UploadPanel extends Composite {
 	 */
 	private void updateTree(TreeItem treeItem, MyFile[] folders) {
 		for (MyFile folder : folders) {
-			if (folder.getFileType() == MyFile.TYPE_FILE) {
+			if (folder.getType() == FileType.FILE) {
 				continue;
 			}
 			final TreeItem item = new TreeItem();

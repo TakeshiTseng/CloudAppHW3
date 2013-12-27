@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 
 public class LoginDialogBox extends DialogBox implements ClickHandler{
 	private final LoginServiceAsync loginServiceAsync = GWT.create(LoginService.class);
@@ -59,8 +60,25 @@ public class LoginDialogBox extends DialogBox implements ClickHandler{
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
 		flexTable.setWidget(3, 1, horizontalPanel);
 		
+		AbsolutePanel absolutePanel = new AbsolutePanel();
+		horizontalPanel.add(absolutePanel);
+		absolutePanel.setSize("235px", "32px");
+		
 		Button button = new Button("登入");
-		horizontalPanel.add(button);
+		absolutePanel.add(button, 0, 0);
+		
+		Label lblNewLabel = new Label("　　　　");
+		absolutePanel.add(lblNewLabel, 49, 0);
+		
+		Button button_1 = new Button("取消");
+		absolutePanel.add(button_1, 105, 0);
+		button_1.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				hide();
+			}
+		});
 		button.addClickHandler(this);
 		
 		thisPanel = this;
@@ -121,5 +139,4 @@ public class LoginDialogBox extends DialogBox implements ClickHandler{
 		});
 		
 	}
-
 }

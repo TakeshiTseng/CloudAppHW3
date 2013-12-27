@@ -17,11 +17,12 @@ public class ShareFilePanelDialogBox extends DialogBox {
 	private final FileServiceAsync fileServiceAsync = GWT
 			.create(FileService.class);
 
-	public ShareFilePanelDialogBox(ArrayList<MyFile> fileList) {
+	public ShareFilePanelDialogBox(ArrayList<File> fileList) {
 		this();
-		this.fileList = fileList;
-		for (MyFile myFile : fileList) {
+		for (File file : fileList) {
+			MyFile myFile = (MyFile)file;
 			addRow(myFile);
+			this.fileList.add(myFile);
 		}
 	}
 
@@ -30,6 +31,7 @@ public class ShareFilePanelDialogBox extends DialogBox {
 	 */
 	public ShareFilePanelDialogBox() {
 		setSize("", "");
+		fileList = new ArrayList<MyFile>();
 
 		VerticalPanel verticalPanel = new VerticalPanel();
 		setWidget(verticalPanel);
@@ -118,11 +120,11 @@ public class ShareFilePanelDialogBox extends DialogBox {
 			fileServiceAsync.addFileToShareLink(
 					sharefilesList.toArray(new Long[sharefilesList.size()]),
 					shareNameTextBox.getText(), owner,
-					new AsyncCallback<Void>() {
+					new AsyncCallback<ShareLink>() {
 
 						@Override
-						public void onSuccess(Void result) {
-							System.out.println("add files ID sucess");
+						public void onSuccess(ShareLink result) {
+							System.out.println("add files ID sucess "+result);
 						}
 
 						@Override

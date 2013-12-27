@@ -15,29 +15,27 @@ import tw.ttucse.cloudhw3.client.MyFile;
 import tw.ttucse.cloudhw3.client.PMF;
 import tw.ttucse.cloudhw3.client.ShareLink;
 import tw.ttucse.cloudhw3.client.User;
+import tw.ttucse.cloudhw3.client.File.FileType;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
-
-
-
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class FileServiceImpl extends RemoteServiceServlet implements
 		FileService {
 	BlobstoreService blobstoreService = BlobstoreServiceFactory
 			.getBlobstoreService();
+
 	public FileServiceImpl() {
 		System.out.println("fileserviceImpl loading scuess");
 	}
 
 	private static final long serialVersionUID = 8169459258144511133L;
 
-
 	@Override
 	public MyFile getFileWithName(String name, String parent)
 			throws IllegalArgumentException {
-		return getFileWithName(name,parent,false);
+		return getFileWithName(name, parent, false);
 	}
 
 	@Override
@@ -45,19 +43,20 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 			throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 
-		String queryString = "name ==\'"+ name+"\' && fileFolder == \'" + parent + "\'";
+		String queryString = "name ==\'" + name + "\' && fileFolder == \'"
+				+ parent + "\'";
 		List<MyFile> files;
-		do{
+		do {
 			@SuppressWarnings("unchecked")
 			List<MyFile> list = (List<MyFile>) pm.newQuery(MyFile.class,
-				queryString).execute();
-			files=list;
-			isSure=isSure&&files.isEmpty();
-		}while(isSure);
+					queryString).execute();
+			files = list;
+			isSure = isSure && files.isEmpty();
+		} while (isSure);
 
-		return files.isEmpty()? null:files.get(0);
+		return files.isEmpty() ? null : files.get(0);
 	}
-	
+
 	@Override
 	public Long getNewID() throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
@@ -67,31 +66,43 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 			ID = new Long(1);
 		}
 		pm.close();
-		return ID+1;
+		return ID + 1;
 	}
 
 	@Override
 	public MyFile getFileWithID(Long ID) throws IllegalArgumentException {
-		return getFileWithID(ID,false);
+		return getFileWithID(ID, false);
 	}
-	
+
 	@Override
-	public MyFile getFileWithID(Long ID,boolean isSure) throws IllegalArgumentException {
+	public MyFile getFileWithID(Long ID, boolean isSure)
+			throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 
-		String queryString = "id =="+ ID;
+		String queryString = "id ==" + ID;
 		List<MyFile> files;
-		do{
+		do {
 			@SuppressWarnings("unchecked")
 			List<MyFile> list = (List<MyFile>) pm.newQuery(MyFile.class,
-				queryString).execute();
-			files=list;
-			isSure=isSure&&files.isEmpty();
-		}while(isSure);
+					queryString).execute();
+			files = list;
+			isSure = isSure && files.isEmpty();
+		} while (isSure);
 
-		return files.isEmpty()? null:files.get(0);
+		return files.isEmpty() ? null : files.get(0);
 	}
 	
+
+
+	@Override
+	public MyFile[] getFileWithID(Long[] IDs) throws IllegalArgumentException {
+		ArrayList<MyFile> fileArrayList = new ArrayList<MyFile>();
+		for (Long id : IDs) {
+			fileArrayList.add(getFileWithID(id));
+		}
+		return fileArrayList.toArray(new MyFile[fileArrayList.size()]);
+	}
+
 	@Override
 	public MyFile[] getFilesWithParent(String parent)
 			throws IllegalArgumentException {
@@ -128,23 +139,28 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		}
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 		try {
-			Long ID =getNewID();
+			Long ID = getNewID();
 			String query = "name == \'" + name + "\' && fileFolder == \'"
-					+ parent + "\' && fileType == " + MyFile.TYPE_DIR+" && id=="+ID;
+					+ parent + "\'";
 
 			@SuppressWarnings("unchecked")
 			List<MyFile> dirs = (List<MyFile>) pm.newQuery(MyFile.class, query)
 					.execute();
-			if (dirs.size() != 0) {
+			if (dirs.size() > 1) {
 				System.out.println("Create not OK!");
 				return null;
 			} else {
-				MyFile dir = new MyFile(name, null, parent, MyFile.TYPE_DIR);
-				dir.setId(ID);
-				pm.makePersistent(dir);
-				pm.flush();
-				System.out.println("Create folder OK!");
-				return dir;
+				if (dirs.size() ==1 && dirs.get(0).getType() == FileType.DIR) {
+					System.out.println("Create not OK!");
+					return null;					
+				} else {
+					MyFile dir = new MyFile(name, null, parent, FileType.DIR);
+					dir.setId(ID);
+					pm.makePersistent(dir);
+					pm.flush();
+					System.out.println("Create folder OK!");
+					return dir;
+				}
 			}
 
 		} catch (Exception e) {
@@ -155,16 +171,16 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		}
 
 	}
-	
+
 	@Override
 	public MyFile deleteFile(MyFile file) throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 		Transaction transaction = pm.currentTransaction();
-		String filepath = file.getFileFolder()+"/"+file.getName();
-		Object obj=null;
+		String filepath = file.getFileFolder() + "/" + file.getName();
+		Object obj = null;
 		try {
 			Extent<MyFile> ext = pm.getExtent(MyFile.class, false);
-			String str = "id=="+file.getId();
+			String str = "id==" + file.getId();
 			Query qry = pm.newQuery(ext, str);
 			Collection<?> c = (Collection<?>) qry.execute();
 			obj = c.iterator().next();
@@ -181,10 +197,10 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public boolean deleteFloder(MyFile file) throws IllegalArgumentException {
-		if(file.getFileType() == MyFile.TYPE_FILE){
+		if (file.getType() == FileType.FILE) {
 			return false;
 		}
-		String path = file.getFileFolder()+"/"+file.getName()+"/";
+		String path = file.getFileFolder() + "/" + file.getName() + "/";
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
 		MyFile[] myFilesattay;
 		String queryString = "SELECT FROM " + MyFile.class.getName();
@@ -195,7 +211,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 			myFilesattay = dirs.toArray(new MyFile[dirs.size()]);
 			ArrayList<MyFile> myFileslist = new ArrayList<MyFile>();
 			for (MyFile myFile : myFilesattay) {
-				if ((myFile.getFileFolder()+"/").startsWith(path)) {
+				if ((myFile.getFileFolder() + "/").startsWith(path)) {
 					myFileslist.add(myFile);
 				}
 			}
@@ -221,7 +237,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		if (myFiles.isEmpty()) {
 			System.out.println("Default myFiles not exist, add folder....");
 			MyFile newFile = new MyFile(user.getAccount(), null, ".",
-					MyFile.TYPE_DIR);
+					FileType.DIR);
 			String query2 = "SELECT MAX(id) FROM " + MyFile.class.getName();
 			Long ID = (Long) pm.newQuery(query2).execute();
 			if (ID == null) {
@@ -247,7 +263,7 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		MyFile oldfile = null;
 		String oldParentString = null;
 		String newParentString = newfile.getFileFolder() + "/"
-				+ newfile.getName()+"/";
+				+ newfile.getName() + "/";
 
 		try {
 			Extent<MyFile> ext = pm.getExtent(MyFile.class, false);
@@ -256,7 +272,8 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 			Collection<?> c = (Collection<?>) qry.execute();
 			Object obj = c.iterator().next();
 			oldfile = (MyFile) obj;
-			oldParentString = oldfile.getFileFolder() + "/" + oldfile.getName()+"/";
+			oldParentString = oldfile.getFileFolder() + "/" + oldfile.getName()
+					+ "/";
 
 			oldfile.setName(newfile.getName());
 			oldfile.setFileFolder(newfile.getFileFolder());
@@ -272,8 +289,8 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		} finally {
 			pm.close();
 		}
-		
-		modifySubFloder(oldParentString,newParentString);
+
+		modifySubFloder(oldParentString, newParentString);
 		return oldfile;
 	}
 
@@ -289,18 +306,21 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 			ArrayList<MyFile> myFileslist = new ArrayList<MyFile>();
 			int oldFolderStringLen = oldFolderString.length();
 			for (MyFile myFile : myFilesattay) {
-				if ((myFile.getFileFolder()+"/").startsWith(oldFolderString)) {
+				if ((myFile.getFileFolder() + "/").startsWith(oldFolderString)) {
 					myFileslist.add(myFile);
 				}
 			}
 			Transaction transaction = pm.currentTransaction();
 
 			for (MyFile myFile : myFileslist) {
-				String folderString = myFile.getFileFolder()+"/";
+				String folderString = myFile.getFileFolder() + "/";
 				folderString = newFolderString
 						+ folderString.substring(oldFolderStringLen);
-				folderString=folderString.substring(0,folderString.length()-1);
-				System.out.println("Modify : "+myFile.getFileFolder()+"/"+myFile.getName()+" => "+folderString+"/"+myFile.getName());
+				folderString = folderString.substring(0,
+						folderString.length() - 1);
+				System.out.println("Modify : " + myFile.getFileFolder() + "/"
+						+ myFile.getName() + " => " + folderString + "/"
+						+ myFile.getName());
 				myFile.setFileFolder(folderString);
 
 				try {
@@ -323,50 +343,55 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 		return url;
 	}
 
-
 	@Override
-	public void addFileToShareLink(Long[] fileId, String shareLinkName,
+	public ShareLink addFileToShareLink(Long[] fileId, String shareLinkName,
 			String owner) throws IllegalArgumentException {
 		PersistenceManager pm = PMF.getInstance().getPersistenceManager();
-		String queryString = "SELECT FROM " + ShareLink.class.getName() + " WHERE shareName == \'" + shareLinkName + "\' && owner == \'" + owner + "\'"; 
+		String queryString = "SELECT FROM " + ShareLink.class.getName()
+				+ " WHERE shareName == \'" + shareLinkName
+				+ "\' && owner == \'" + owner + "\'";
 		Query query = pm.newQuery(queryString);
-		
+
 		@SuppressWarnings("unchecked")
 		List<ShareLink> shareLinks = (List<ShareLink>) query.execute();
-		if(shareLinks.size() == 0){
+		if (shareLinks.size() == 0) {
 			// share link not exist
-			
+
 			ShareLink shareLink = new ShareLink(shareLinkName, owner);
 			for (Long id : fileId) {
 				shareLink.addID(id);
 			}
-			
-			try{
+
+			try {
 				pm.makePersistent(shareLink);
-				pm.flush();				
-			} finally{
+				pm.flush();
+				return shareLink;
+			} finally {
 				pm.close();
 			}
-			
+
 		} else {
 			// share link exist
 			ShareLink shareLink = shareLinks.get(0);
 			for (Long id : fileId) {
 				shareLink.addID(id);
 			}
+			System.out.println(shareLink);
 			Transaction transaction = pm.currentTransaction();
 			transaction.begin();
-			try{
+			try {
 				pm.makePersistent(shareLink);
-				pm.flush();	
+				pm.flush();
 				transaction.commit();
-			}catch(Exception ex){
+				return shareLink;
+			} catch (Exception ex) {
 				transaction.rollback();
 				ex.printStackTrace();
-			}finally{			
+				return null;
+			} finally {
 				pm.close();
 			}
-			
+
 		}
 	}
 
@@ -410,5 +435,4 @@ public class FileServiceImpl extends RemoteServiceServlet implements
 
 		return files.toArray(new ShareLink[files.size()]);
 	}
-
 }

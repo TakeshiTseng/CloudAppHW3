@@ -7,8 +7,9 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
+
 @PersistenceCapable
-public class ShareLink implements Serializable {
+public class ShareLink extends File implements Serializable {
 	private static final long serialVersionUID = 162117174826921425L;
 
 	@PrimaryKey 
@@ -26,6 +27,7 @@ public class ShareLink implements Serializable {
 	
 	public ShareLink() {
 		idstr="";
+		setType(FileType.SHARELINK);
 	}
 
 	public ShareLink(String name,String owner){
@@ -88,5 +90,15 @@ public class ShareLink implements Serializable {
 	@Override
 	public String toString() {
 		return "{"+idstr.substring(0, idstr.length()-1)+"}";
+	}
+
+	@Override
+	public FileType getType() {
+		return FileType.SHARELINK;
+	}
+
+	@Deprecated
+	@Override
+	public void setType(FileType type) {
 	}
 }
