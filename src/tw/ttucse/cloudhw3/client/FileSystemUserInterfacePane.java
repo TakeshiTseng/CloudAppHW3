@@ -3,6 +3,7 @@ package tw.ttucse.cloudhw3.client;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import tw.ttucse.cloudhw3.client.File.FileType;
 import tw.ttucse.cloudhw3.client.FloderFormDialogBox.Type;
 
 import com.google.gwt.core.shared.GWT;
@@ -10,23 +11,43 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.*;
 
 public class FileSystemUserInterfacePane extends Composite {
-	private static FileSystemUserInterfacePane instance;
-	private String path = "";
-	private MyFile myFile;
-	private Stack<MyFile> myfileStack = new Stack<MyFile>();
-	private Button backButton;
-	private ArrayList<MyFile> fileList;
-
-	public MyFile getMyFile() {
-		return myFile;
+	enum Mode {
+		Controll, Search
 	}
 
-	public void setMyFile(MyFile myFile) {
-		this.myFile = myFile;
+	private static FileSystemUserInterfacePane instance;
+	private String path = "";
+	private String pathstr = "";
+	private File file;
+	private Stack<File> fileStack = new Stack<File>();
+	private Button backButton;
+	private ArrayList<File> fileList;
+	// private ArrayList<MyFile> fileList;
+	// private ArrayList<ShareLink> shareLinksList;
+	private Mode mode = Mode.Controll;
+
+	public Mode getMode() {
+		return mode;
+	}
+
+	public void setMode(Mode mode) {
+		this.mode = mode;
+		if (mode == Mode.Search) {
+			disableItem();
+		} else {
+
+		}
+	}
+
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
 	}
 
 	public String getPath() {
@@ -40,17 +61,24 @@ public class FileSystemUserInterfacePane extends Composite {
 	private final FileServiceAsync fileServiceAsync = GWT
 			.create(FileService.class);
 
-	public ArrayList<MyFile> getFileList() {
+	public ArrayList<File> getFileList() {
 		return fileList;
 	}
 
-	public void setFileList(ArrayList<MyFile> fileList) {
+	public void setFileList(ArrayList<File> fileList) {
 		this.fileList = fileList;
 	}
 
 	private Label usernameLabel;
 	private Label pathLabel;
 	private FlexTable flexTable;
+	private Button closebutton;
+	private Button printAllFileButton;
+	private Button printAllShareButton;
+	private Button Creatbutton;
+	private Button Uploadbutton;
+	private Button Sharebutton;
+	private Label userlabel;
 
 	public static FileSystemUserInterfacePane getInstance() {
 		return instance;
@@ -68,17 +96,17 @@ public class FileSystemUserInterfacePane extends Composite {
 		verticalPanel.add(absolutePanel);
 		absolutePanel.setHeight("27px");
 
-		Button button = new Button("X");
-		absolutePanel.add(button, 0, 0);
-		button.setSize("29px", "27px");
-		button.addClickHandler(new closeButtonClickHander());
+		closebutton = new Button("X");
+		absolutePanel.add(closebutton, 0, 0);
+		closebutton.setSize("29px", "27px");
+		closebutton.addClickHandler(new closeButtonClickHander());
 
 		Label label = new Label("CloudApp  -  File Systems");
 		label.setStyleName("FileSystemUI_Title");
 		absolutePanel.add(label, 324, 0);
 
-		Button btnNewButton = new Button("Print All File to Console");
-		btnNewButton.addClickHandler(new ClickHandler() {
+		printAllFileButton = new Button("Print All File to Console");
+		printAllFileButton.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -93,7 +121,9 @@ public class FileSystemUserInterfacePane extends Composite {
 					public void onSuccess(MyFile[] result) {
 						System.out.println("\n*****\nAll file:");
 						for (MyFile file : result) {
-							System.out.println(file.getFileFolder() + "/"
+							System.out.println("ID:" + file.getId() + "\t\t"
+									+ file.getType() + "\t"
+									+ file.getFileFolder() + "/"
 									+ file.getName());
 						}
 						System.out.println("*****\n");
@@ -101,13 +131,42 @@ public class FileSystemUserInterfacePane extends Composite {
 				});
 			}
 		});
-		absolutePanel.add(btnNewButton, 35, -3);
+		absolutePanel.add(printAllFileButton, 35, -3);
+
+		printAllShareButton = new Button("printAllShareButton");
+		absolutePanel.add(printAllShareButton, 202, 0);
+		printAllShareButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				fileServiceAsync
+						.getShareLinks(new AsyncCallback<ShareLink[]>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								caught.printStackTrace();
+							}
+
+							@Override
+							public void onSuccess(ShareLink[] result) {
+								System.out.println("\n*****\nAll ShareLink:");
+								for (ShareLink shareLink : result) {
+									System.out.println("ShareName:"
+											+ shareLink.shareName
+											+ "\t\tOwner:" + shareLink.owner);
+									System.out.println(shareLink);
+								}
+								System.out.println("*****\n");
+							}
+						});
+			}
+		});
 
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
 		verticalPanel.add(horizontalPanel);
 
-		Label label_1 = new Label("User : ");
-		horizontalPanel.add(label_1);
+		userlabel = new Label("User : ");
+		horizontalPanel.add(userlabel);
 
 		usernameLabel = new Label();
 		horizontalPanel.add(usernameLabel);
@@ -115,15 +174,15 @@ public class FileSystemUserInterfacePane extends Composite {
 		HorizontalPanel horizontalPanel_1 = new HorizontalPanel();
 		verticalPanel.add(horizontalPanel_1);
 
-		Button button_1 = new Button("Creat Floder");
-		horizontalPanel_1.add(button_1);
-		button_1.addClickHandler(new ClickHandler() {
+		Creatbutton = new Button("Creat Floder");
+		horizontalPanel_1.add(Creatbutton);
+		Creatbutton.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				FloderFormDialogBox creatFloderDialogBox = new FloderFormDialogBox(
 						Type.Create, null, null);
-				creatFloderDialogBox.initFloder(getMyFile());
+				creatFloderDialogBox.initFloder((MyFile) getFile());
 				creatFloderDialogBox.setAnimationEnabled(true);
 				creatFloderDialogBox.setText("Create Folder DialogBox");
 
@@ -134,25 +193,25 @@ public class FileSystemUserInterfacePane extends Composite {
 		Label label_3 = new Label("　　　　");
 		horizontalPanel_1.add(label_3);
 
-		Button button_2 = new Button("Upload File");
-		horizontalPanel_1.add(button_2);
+		Uploadbutton = new Button("Upload File");
+		horizontalPanel_1.add(Uploadbutton);
 
-		button_2.addClickHandler(new ClickHandler() {
+		Uploadbutton.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				UploadPanelDialogBox uploadPanel = new UploadPanelDialogBox(
-						myFile);
+						(MyFile) file);
 				uploadPanel.center();
 			}
 		});
-		
+
 		Label label_2 = new Label("　　　　");
 		horizontalPanel_1.add(label_2);
-		
-		Button button_3 = new Button("Share Files");
-		horizontalPanel_1.add(button_3);
-		button_3.addClickHandler(new ClickHandler() {
+
+		Sharebutton = new Button("Share Files");
+		horizontalPanel_1.add(Sharebutton);
+		Sharebutton.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -160,8 +219,8 @@ public class FileSystemUserInterfacePane extends Composite {
 						fileList);
 				shareFilePanelDialogBox.center();
 			}
-		}); 
-		
+		});
+
 		HorizontalPanel horizontalPanel_2 = new HorizontalPanel();
 		horizontalPanel_2
 				.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -241,21 +300,25 @@ public class FileSystemUserInterfacePane extends Composite {
 	}
 
 	public void initWithMyfile(MyFile myFile) {
-		setMyFile(myFile);
-		System.out.println("set file :" + getMyFile().getName());
+		setFile(myFile);
+		System.out.println("set file :" + ((MyFile) getFile()).getName());
 		String path = myFile.getFileFolder() + "/" + myFile.getName();
 		initWithPath(path);
 	}
 
 	public void initWithPath(String path) {
 		this.path = path;
-		pathLabel.setText(path);
+		if (mode != Mode.Search) {
+			pathLabel.setText(getPath());
+		} else {
+			pathLabel.setText(pathstr);
+		}
 		fileServiceAsync.getFilesWithParent(path,
 				new AsyncCallback<MyFile[]>() {
 
 					@Override
 					public void onSuccess(MyFile[] result) {
-						fileList = new ArrayList<MyFile>();
+						fileList = new ArrayList<File>();
 						for (MyFile myFile : result) {
 							fileList.add(myFile);
 						}
@@ -269,12 +332,75 @@ public class FileSystemUserInterfacePane extends Composite {
 				});
 	}
 
+	public void initWithShareName(String ShareName) {
+		pathstr = ShareName + "/";
+		usernameLabel.setText(ShareName);
+		setPath(pathstr);
+		pathLabel.setText(getPath());
+		fileServiceAsync.getShareLinksWithShareName(ShareName,
+				new AsyncCallback<ShareLink[]>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						caught.printStackTrace();
+					}
+
+					@Override
+					public void onSuccess(ShareLink[] result) {
+						if (result.length == 0) {
+							Window.alert("This keyword no file to share.");
+						}
+						fileList = new ArrayList<File>();
+						for (ShareLink shareLink : result) {
+							fileList.add(shareLink);
+						}
+						updateUI();
+					}
+				});
+	}
+
+	public void initWithShareLink(ShareLink shareLink) {
+		setFile(shareLink);
+
+		pathLabel.setText(pathstr);
+		ArrayList<Long> IDs = new ArrayList<Long>();
+		String[] IDsString = shareLink.idstr.split(",");
+		for (String string : IDsString) {
+			IDs.add(Long.parseLong(string));
+		}
+		fileServiceAsync.getFileWithID(IDs.toArray(new Long[IDs.size()]),
+				new AsyncCallback<MyFile[]>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						caught.printStackTrace();
+					}
+
+					@Override
+					public void onSuccess(MyFile[] result) {
+						fileList = new ArrayList<File>();
+						for (MyFile file : result) {
+							fileList.add(file);
+						}
+						updateUI();
+					}
+				});
+	}
+
 	public void updateUI() {
 		initFlexTable();
-		String[] str = path.split("/");
-		backButton.setEnabled(str.length > 2);
-		for (MyFile myFile : fileList) {
-			addRow(myFile);
+		String[] str = pathLabel.getText().split("/");
+		if (mode != Mode.Search) {
+			backButton.setEnabled(str.length > 2);
+		} else {
+			backButton.setEnabled(str.length > 1);
+		}
+		for (File file : fileList) {
+			if (file.getType() != FileType.SHARELINK) {
+				addRow((MyFile) file);
+			} else {
+				addRow((ShareLink) file);
+			}
 		}
 	}
 
@@ -284,7 +410,7 @@ public class FileSystemUserInterfacePane extends Composite {
 		int row = flexTable.getRowCount();
 		Button filebtn = new Button(myFile.getName());
 		filebtn.addClickHandler(new MyfileClickHandler());
-		if (myFile.getFileType() == MyFile.TYPE_DIR) {
+		if (myFile.getType() == FileType.DIR) {
 			filebtn.setStyleName("fileButton");
 		}
 
@@ -300,6 +426,22 @@ public class FileSystemUserInterfacePane extends Composite {
 		flexTable.setWidget(row, 3, removrbtn);
 	}
 
+	public void addRow(ShareLink shareLink) {
+		// System.out.println("add :" + myFile.name + " type:"
+		// + myFile.getTypeName());
+		int row = flexTable.getRowCount();
+		Button sharebtn = new Button(shareLink.getShareName());
+		sharebtn.setTitle(shareLink.getId().toString());
+		sharebtn.addClickHandler(new ShareLinkClickHander());
+		// if (myFile.getFileType() == MyFile.TYPE_DIR) {
+		sharebtn.setStyleName("fileButton");
+		// }
+
+		flexTable.setWidget(row, 0, sharebtn);
+		flexTable.setWidget(row, 1, new Label("ShareLink"));
+		flexTable.setWidget(row, 2, new Label(shareLink.getOwner()));
+	}
+
 	public void initFlexTable() {
 		flexTable.removeAllRows();
 		Label label_5 = new Label("File Name");
@@ -310,13 +452,39 @@ public class FileSystemUserInterfacePane extends Composite {
 		flexTable.setWidget(0, 1, label_6);
 		label_6.setWidth("60px");
 
-		Label label_7 = new Label("Modify");
-		flexTable.setWidget(0, 2, label_7);
-		label_7.setWidth("60px");
+		if (mode == Mode.Controll) {
+			Label label_7 = new Label("Modify");
+			flexTable.setWidget(0, 2, label_7);
+			label_7.setWidth("60px");
 
-		Label label_8 = new Label("Remove");
-		flexTable.setWidget(0, 3, label_8);
-		label_8.setWidth("60px");
+			Label label_8 = new Label("Remove");
+			flexTable.setWidget(0, 3, label_8);
+			label_8.setWidth("60px");
+		} else {
+			Label label_7 = new Label("Owner");
+			flexTable.setWidget(0, 2, label_7);
+			label_7.setWidth("60px");
+		}
+	}
+
+	public void disableItem() {
+		closebutton.setVisible(false);
+		printAllFileButton.setVisible(false);
+		printAllShareButton.setVisible(false);
+		Creatbutton.setVisible(false);
+		Uploadbutton.setVisible(false);
+		Sharebutton.setVisible(false);
+		userlabel.setText("KeyWord : ");
+	}
+
+	public void enableItem() {
+		closebutton.setVisible(true);
+		printAllFileButton.setVisible(true);
+		printAllShareButton.setVisible(true);
+		Creatbutton.setVisible(true);
+		Uploadbutton.setVisible(true);
+		Sharebutton.setVisible(true);
+		userlabel.setText("User : ");
 	}
 
 	class closeButtonClickHander implements ClickHandler {
@@ -339,7 +507,7 @@ public class FileSystemUserInterfacePane extends Composite {
 			String name = ((Button) event.getSource()).getTitle();
 			MyFile selectFile = null;
 			for (int i = 0; i < fileList.size(); i++) {
-				MyFile file = fileList.get(i);
+				MyFile file = (MyFile) fileList.get(i);
 				if (file.getName().equals(name)) {
 					selectFile = file;
 					selectIndex = i;
@@ -347,7 +515,7 @@ public class FileSystemUserInterfacePane extends Composite {
 			}
 			FloderFormDialogBox floderFormDialogBox = new FloderFormDialogBox(
 					Type.Modify, selectFile, selectIndex);
-			floderFormDialogBox.initFloder(getMyFile());
+			floderFormDialogBox.initFloder((MyFile) getFile());
 			floderFormDialogBox.setAnimationEnabled(true);
 			floderFormDialogBox.setText("Modify Folder DialogBox");
 
@@ -364,14 +532,14 @@ public class FileSystemUserInterfacePane extends Composite {
 			String name = ((Button) event.getSource()).getTitle();
 			MyFile selectFile = null;
 			for (int i = 0; i < fileList.size(); i++) {
-				MyFile file = fileList.get(i);
+				MyFile file = (MyFile) fileList.get(i);
 				if (file.getName().equals(name)) {
 					selectFile = file;
 					selectIndex = i;
 				}
 			}
 
-			if (selectFile.getFileType() == MyFile.TYPE_DIR) {
+			if (selectFile.getType() == FileType.DIR) {
 				fileServiceAsync.deleteFloder(selectFile,
 						new AsyncCallback<Boolean>() {
 
@@ -402,20 +570,6 @@ public class FileSystemUserInterfacePane extends Composite {
 							}
 						});
 			}
-
-			/*
-			 * fileServiceAsync.deleteSubFloder(selectFile.getFileFolder() + "/"
-			 * + selectFile.getName() + "/", new AsyncCallback<Void>() {
-			 * 
-			 * @Override public void onFailure(Throwable caught) {
-			 * System.out.println("File delete failure"); }
-			 * 
-			 * @Override public void onSuccess(Void result) {
-			 * fileList.remove(selectIndex); flexTable.removeRow(selectIndex +
-			 * 1);
-			 * 
-			 * } });
-			 */
 		}
 	}
 
@@ -425,19 +579,21 @@ public class FileSystemUserInterfacePane extends Composite {
 		public void onClick(ClickEvent event) {
 			String name = ((Button) event.getSource()).getText();
 			MyFile selectFile = null;
-			for (MyFile myfile : fileList) {
-				if (myfile.getName().equals(name)) {
-					selectFile = myfile;
+			for (File file : fileList) {
+				MyFile myFile = (MyFile) file;
+				if (myFile.getName().equals(name)) {
+					selectFile = myFile;
 				}
 			}
-			if (selectFile.fileType == MyFile.TYPE_DIR) {
-				myfileStack.push(getMyFile());
+			if (selectFile.getType() == FileType.DIR) {
+				fileStack.push(getFile());
+				pathstr = pathstr + selectFile.name + "/";
 				initWithMyfile(selectFile);
 				updateUI();
 			} else {
 				String blobKeyString = selectFile.getFileKey();
 				String fileName = selectFile.getName();
-				
+
 				String downloadURL = "/cloudapphw3/download?blob-key="
 						+ blobKeyString + "&fileName=" + fileName;
 				Window.Location.assign(downloadURL);
@@ -445,13 +601,47 @@ public class FileSystemUserInterfacePane extends Composite {
 		}
 	}
 
+	class ShareLinkClickHander implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			String name = ((Button) event.getSource()).getTitle();
+			ShareLink selectShareLink = null;
+			for (File file : fileList) {
+				ShareLink shareLink = (ShareLink) file;
+				if (shareLink.getId().toString().equals(name)) {
+					selectShareLink = shareLink;
+				}
+			}
+			pathstr = pathstr + selectShareLink.owner + "/";
+			initWithShareLink(selectShareLink);
+			updateUI();
+
+		}
+
+	}
+
 	class BackButtonClickHander implements ClickHandler {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			MyFile m = myfileStack.pop();
-			System.out.println(m.getName());
-			initWithMyfile(m);
+			if (mode == Mode.Search) {
+				int i = pathstr.substring(0, pathstr.length() - 1).lastIndexOf(
+						"/");
+				pathstr = pathstr.substring(0, i);
+			}
+			if (!fileStack.isEmpty()) {
+				File file = fileStack.pop();
+				if (file instanceof MyFile) {
+					initWithMyfile((MyFile) file);
+				} else {
+					System.out.println("sh " + (ShareLink) file);
+					initWithShareLink((ShareLink) file);
+				}
+			} else {
+				String keyWord = pathstr;
+				initWithShareName(keyWord);
+			}
 			updateUI();
 		}
 	}

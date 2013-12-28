@@ -8,10 +8,8 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 @PersistenceCapable
-public class MyFile implements Serializable {
+public class MyFile extends File implements Serializable {
 	private static final long serialVersionUID = -1954648572633792095L;
-	public static final Integer TYPE_DIR = 0;
-	public static final Integer TYPE_FILE = 1;
 	
 	@PrimaryKey 
 	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
@@ -26,20 +24,20 @@ public class MyFile implements Serializable {
 
 	@Persistent
 	String name;
-
+	
 	@Persistent
-	Integer fileType;
+	FileType filetype;
 	
 	public MyFile() {
 		// TODO Auto-generated constructor stub
 	}
 
 	public MyFile(String filename, String fileKey, String fileFolder,
-			Integer fileType) {
+			FileType fileType) {
 		this.name = filename;
 		this.fileKey = fileKey;
 		this.fileFolder = fileFolder;
-		this.fileType = fileType;
+		setType(fileType);
 	}
 
 	public Long getId() {
@@ -73,21 +71,11 @@ public class MyFile implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public void setFileType(Integer fileType) {
-		this.fileType = fileType;
-	}
-
-	public Integer getFileType() {
-		return fileType;
-	}
 	
-
-	
-	public static String  getTypeString(MyFile myFile) {
-		if (myFile.fileType == MyFile.TYPE_DIR) {
+	public static String  getTypeString(MyFile myFile) {;
+		if (myFile.getType() ==FileType.DIR) {
 			return "Floder";
-		}else if (myFile.fileType == MyFile.TYPE_FILE) {
+		}else if (myFile.getType() == FileType.FILE) {
 			return "File";
 		}
 		return null;
@@ -97,4 +85,14 @@ public class MyFile implements Serializable {
 		return getTypeString(this);
 	}
 
+	@Override
+	public FileType getType() {
+		return filetype;
+	}
+
+	@Override
+	public void setType(FileType type) {
+		filetype=type;
+		super.setType(type);
+	}
 }

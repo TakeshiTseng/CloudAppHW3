@@ -2,6 +2,8 @@ package tw.ttucse.cloudhw3.client;
 
 import java.util.ArrayList;
 
+import tw.ttucse.cloudhw3.client.File.FileType;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -91,7 +93,7 @@ public class FloderFormDialogBox extends DialogBox implements ClickHandler {
 		final String myfilenameString = myfilename.getText();
 		registerButton.setEnabled(false);
 		final MyFile myFile = new MyFile(myfilenameString, null,
-				floder.getFileFolder()+"/"+floder.getName(), MyFile.TYPE_DIR);
+				floder.getFileFolder()+"/"+floder.getName(), FileType.DIR);
 		System.out.println("path: "+floder.getFileFolder()+"/"+floder.getName());
 
 		AsyncCallback<MyFile> callback = new AsyncCallback<MyFile>() {
@@ -107,11 +109,11 @@ public class FloderFormDialogBox extends DialogBox implements ClickHandler {
 				if (result != null) {
 					closePanel();
 					if (type == Type.Create) {
-						FileSystemUserInterfacePane.getInstance().getFileList().add(myFile);
+						FileSystemUserInterfacePane.getInstance().getFileList().add(result);
 						FileSystemUserInterfacePane.getInstance()
-								.addRow(myFile);
+								.addRow(result);
 					} else {
-						ArrayList<MyFile> filelist = FileSystemUserInterfacePane.getInstance().getFileList();
+						ArrayList<File> filelist = FileSystemUserInterfacePane.getInstance().getFileList();
 						filelist.remove((int)modifyIndex);
 						filelist.add(modifyIndex,result);		
 						FileSystemUserInterfacePane.getInstance().updateUI();
